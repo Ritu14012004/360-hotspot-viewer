@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360° Panorama Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="container">
+        <div id="viewer"></div>
+        
+       
+        <div id="loading-screen">
+            <div class="spinner"></div>
+            <p>Loading panorama...</p>
+        </div>
+
+ 
+        <div id="controls-panel">
+            <div class="control-group">
+                <button id="fullscreen-btn" title="Toggle Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <button id="zoom-in" title="Zoom In">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="zoom-out" title="Zoom Out">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+
+            <div class="control-group">
+                <button id="reset-view" title="Reset View">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+
+        
+        <div id="scene-selector">
+            <div class="scene-boxes">
+                <div class="scene-box active" data-scene="1.jpg">
+                    <div class="scene-number">1</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="2.jpg">
+                    <div class="scene-number">2</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="3.jpg">
+                    <div class="scene-number">3</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="4.jpg">
+                    <div class="scene-number">4</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="5.jpg">
+                    <div class="scene-number">5</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="6.jpg">
+                    <div class="scene-number">6</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="7.jpg">
+                    <div class="scene-number">7</div>
+                    <div class="scene-preview"></div>
+                </div>
+                <div class="scene-box" data-scene="8.jpg">
+                    <div class="scene-number">8</div>
+                    <div class="scene-preview"></div>
+                </div>
+            </div>
+        </div>
+
+       
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3 id="modal-title"></h3>
+                <p id="modal-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for camera movement -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Custom script -->
+    <script src="script.js"></script>
+</body>
+</html> 
