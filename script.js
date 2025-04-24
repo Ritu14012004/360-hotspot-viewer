@@ -17,8 +17,7 @@ let isLandscape = window.innerWidth > window.innerHeight;
 function init() {
     scene = new THREE.Scene();
 
-    const fov = isPhone ? 90 : 75;
-    camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 0.1);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -39,12 +38,6 @@ function init() {
         ONE: THREE.TOUCH.ROTATE,
         TWO: THREE.TOUCH.DOLLY_PAN
     };
-
-    if (isPhone) {
-        controls.minDistance = 0.1;
-        controls.maxDistance = 0.1;
-        controls.target.set(0, 0, 0);
-    }
 
     controls.addEventListener('start', () => {
         lastInteractionTime = Date.now();
@@ -137,7 +130,6 @@ function handleTouchEnd(event) {
 
 function onOrientationChange() {
     isLandscape = window.innerWidth > window.innerHeight;
-    isPhone = window.innerWidth <= 480;
     onWindowResize();
 }
 
@@ -160,10 +152,6 @@ function loadPanorama(imagePath) {
             const material = new THREE.MeshBasicMaterial({ map: texture });
             panorama = new THREE.Mesh(geometry, material);
             scene.add(panorama);
-
-            if (isPhone) {
-                panorama.position.set(0, 0, 0);
-            }
 
             addHotspot(0, 0, 'Center Point', 'This is the center of the panorama');
             addHotspot(Math.PI / 4, 0, 'Right Side', 'Looking towards the right side');
@@ -208,11 +196,8 @@ function onWindowResize() {
     isPhone = window.innerWidth <= 480;
     isLandscape = window.innerWidth > window.innerHeight;
     
-    const fov = isPhone ? 90 : 75;
-    camera.fov = fov;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
