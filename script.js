@@ -10,26 +10,41 @@ let autoRotate = true;
 let autoRotateSpeed = 0.2;
 let lastInteractionTime = Date.now();
 const interactionTimeout = 3000;
+let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let isPhone = window.innerWidth <= 480;
+let isLandscape = window.innerWidth > window.innerHeight;
 
 function init() {
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const fov = isPhone ? 90 : 75;
+    camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0, 0.1);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.getElementById('viewer').appendChild(renderer.domElement);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableZoom = false;
     controls.enablePan = false;
-    controls.rotateSpeed = -0.5;
+    controls.rotateSpeed = isPhone ? -0.2 : (isMobile ? -0.3 : -0.5);
     controls.minPolarAngle = 0;
     controls.maxPolarAngle = Math.PI;
     controls.autoRotate = false;
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dampingFactor = isPhone ? 0.1 : 0.05;
+    controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+    };
+
+    if (isPhone) {
+        controls.minDistance = 0.1;
+        controls.maxDistance = 0.1;
+        controls.target.set(0, 0, 0);
+    }
 
     controls.addEventListener('start', () => {
         lastInteractionTime = Date.now();
@@ -43,6 +58,7 @@ function init() {
     loadPanorama('drive-download-20250424T172009Z-001/1.jpg');
 
     window.addEventListener('resize', onWindowResize);
+    window.addEventListener('orientationchange', onOrientationChange);
     
     document.querySelectorAll('.scene-box').forEach(box => {
         box.addEventListener('click', () => {
@@ -62,6 +78,67 @@ function init() {
     document.getElementById('reset-view').addEventListener('click', resetView);
     document.getElementById('zoom-in').addEventListener('click', () => zoom(1.1));
     document.getElementById('zoom-out').addEventListener('click', () => zoom(0.9));
+
+    if (isMobile) {
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+    }
+
+    preventPullToRefresh();
+    preventDoubleTapZoom();
+}
+
+function preventDoubleTapZoom() {
+    let lastTap = 0;
+    document.addEventListener('touchend', function(event) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 500 && tapLength > 0) {
+            event.preventDefault();
+        }
+        lastTap = currentTime;
+    });
+}
+
+function preventPullToRefresh() {
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+        const touchY = e.touches[0].clientY;
+        const touchDiff = touchY - touchStartY;
+        
+        if (touchDiff > 0 && window.scrollY === 0) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
+function handleTouchStart(event) {
+    if (event.touches.length > 1) {
+        event.preventDefault();
+    }
+}
+
+function handleTouchMove(event) {
+    if (event.touches.length > 1) {
+        event.preventDefault();
+    }
+}
+
+function handleTouchEnd(event) {
+    if (event.touches.length > 1) {
+        event.preventDefault();
+    }
+}
+
+function onOrientationChange() {
+    isLandscape = window.innerWidth > window.innerHeight;
+    isPhone = window.innerWidth <= 480;
+    onWindowResize();
 }
 
 function loadPanorama(imagePath) {
@@ -83,6 +160,10 @@ function loadPanorama(imagePath) {
             const material = new THREE.MeshBasicMaterial({ map: texture });
             panorama = new THREE.Mesh(geometry, material);
             scene.add(panorama);
+
+            if (isPhone) {
+                panorama.position.set(0, 0, 0);
+            }
 
             addHotspot(0, 0, 'Center Point', 'This is the center of the panorama');
             addHotspot(Math.PI / 4, 0, 'Right Side', 'Looking towards the right side');
@@ -124,9 +205,19 @@ function addHotspot(longitude, latitude, title, text) {
 }
 
 function onWindowResize() {
+    isPhone = window.innerWidth <= 480;
+    isLandscape = window.innerWidth > window.innerHeight;
+    
+    const fov = isPhone ? 90 : 75;
+    camera.fov = fov;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    controls.rotateSpeed = isPhone ? -0.2 : (isMobile ? -0.3 : -0.5);
+    controls.dampingFactor = isPhone ? 0.1 : 0.05;
 }
 
 function animate() {
